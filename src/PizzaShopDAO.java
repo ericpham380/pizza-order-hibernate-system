@@ -14,8 +14,11 @@ public interface PizzaShopDAO {
 	boolean createOrder(PizzaOrder order);
 	boolean createDiscountedOrder(DiscountedPizzaOrder discountedOrder);
 	boolean deleteOrder(int orderID);
-	
+	PizzaOrder getOrderByID(int orderID);
 	List<PizzaOrder> getOrdersByUser(int userID);
+	
+	boolean updateOrder(PizzaOrder order);
+	boolean updateDiscountedOrder(DiscountedPizzaOrder order);
 
 	void closeSessionFactory();
 }

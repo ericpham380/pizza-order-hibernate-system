@@ -59,7 +59,7 @@ public class PresentationLayer {
 			break;		
 			case "4":	allOrdersView();
 			break;
-			case "5":	
+			case "5":	updateOrderView();
 				break;
 			case "6":	cancelOrderView();
 			break;
@@ -257,6 +257,35 @@ public class PresentationLayer {
 		}
 		System.out.println("********************************");
 	}//pizzaOrderView
+	
+	public static void updateOrderView(){
+		PizzaSize size = null;
+		PaymentType type = null;
+		List<Topping> toppings = null;
+
+		
+		System.out.println("================================");
+		System.out.print("Choose an orderID to update: ");
+		int orderNum = reader.nextInt();
+		reader.nextLine();
+		PizzaOrder order = service.findOrderByID(orderNum);
+		
+		if(order != null){
+			size = getPizzaSizeView();
+			toppings = getToppingsView();
+			type = getPaymentView();
+			
+			if(service.finalizeUpdateOrder(order, size, toppings, type)){
+				System.out.println("Your order is successfully updated.\n");
+			} else {
+				System.out.println("ERROR: cannot update your order.");
+				System.out.println("Please try again.\n");
+			}
+		}
+		else
+			System.out.println("Invalid selected order number");
+		
+	}
 
 	/**============================== allOrdersView ================================
 	 * Show all the orders of a user.
@@ -281,40 +310,46 @@ public class PresentationLayer {
 
 			System.out.printf("%-7s", "PAYMENT");
 			System.out.println();
-			for(PizzaOrder order : orders){
-				if(order != null){
-					System.out.printf("%-7d", order.getOrderID());
-					System.out.printf("%-7s", order.getSize());
-					toppings = order.getToppingList();
-					if(toppings != null){
-						for(Topping topping : toppings){
-							if(topping != null)
-								System.out.printf("%-14s", topping.getName());
-						}
-						for(int i = toppings.size(); i < 3; i++){
-							System.out.printf("%-14s", "null");
-						}
-					}
-					if(order.getClass() == DiscountedPizzaOrder.class){
-						DiscountedPizzaOrder temp = (DiscountedPizzaOrder)order;
-						System.out.printf("%-2.0f", temp.getDiscountedrate() * 100);
-						System.out.printf("%-8s", "% OFF");
-						System.out.printf("$%-7.2f", temp.getDiscountPrice());
-
-					} else{
-						System.out.printf("%-10s", "  NO");
-						System.out.printf("$%-7.2f", order.getTotalPrice());
-					}
-
-					System.out.printf("%-7s", order.getPaymentType());
-					System.out.println();
-				}
-			}//for-loop
+			printOrders(orders);
 		}//else-statement
 		System.out.println("============================================"
 				+ "=====================================");
 	}//allOrdersView
 
+	public static void printOrders(List<PizzaOrder> orders){
+		List<Topping> toppings = null;
+		
+		for(PizzaOrder order : orders){
+			if(order != null){
+				System.out.printf("%-7d", order.getOrderID());
+				System.out.printf("%-7s", order.getSize());
+				toppings = order.getToppingList();
+				if(toppings != null){
+					for(Topping topping : toppings){
+						if(topping != null)
+							System.out.printf("%-14s", topping.getName());
+					}
+					for(int i = toppings.size(); i < 3; i++){
+						System.out.printf("%-14s", "null");
+					}
+				}
+				if(order.getClass() == DiscountedPizzaOrder.class){
+					DiscountedPizzaOrder temp = (DiscountedPizzaOrder)order;
+					System.out.printf("%-2.0f", temp.getDiscountedrate() * 100);
+					System.out.printf("%-8s", "% OFF");
+					System.out.printf("$%-7.2f", temp.getDiscountPrice());
+
+				} else{
+					System.out.printf("%-10s", "  NO");
+					System.out.printf("$%-7.2f", order.getTotalPrice());
+				}
+
+				System.out.printf("%-7s", order.getPaymentType());
+				System.out.println();
+			}
+		}//for-loop
+
+	}
 	
 	/**============================= cancelOrderView ===============================
 	 * Prompt user for orderID and cancel that order

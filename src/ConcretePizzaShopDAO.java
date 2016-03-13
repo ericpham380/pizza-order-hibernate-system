@@ -194,6 +194,7 @@ public class ConcretePizzaShopDAO implements PizzaShopDAO{
 	 * Given orderID, delete the pizza order
 	 */			
 	public boolean deleteOrder(int orderID){
+		PizzaOrder order = null;
 		try {
 			session = sessionFactory.openSession();
 			transaction = session.beginTransaction();
@@ -202,7 +203,7 @@ public class ConcretePizzaShopDAO implements PizzaShopDAO{
 			Query query = session.createQuery(queryStr);
 			query.setInteger("id", orderID);
 			
-			PizzaOrder order = (PizzaOrder) query.uniqueResult();
+			order = (PizzaOrder) query.uniqueResult();
 			session.delete(order);
 			
 			transaction.commit();
@@ -212,7 +213,61 @@ public class ConcretePizzaShopDAO implements PizzaShopDAO{
 		} finally {
 			session.close();
 		}
-		
+		return true;
+	}
+	
+	public PizzaOrder getOrderByID(int orderID){
+		PizzaOrder order = null;
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+			
+			String queryStr = "from PizzaOrder where orderID = :id";
+			Query query = session.createQuery(queryStr);
+			query.setInteger("id", orderID);
+			
+			order = (PizzaOrder) query.uniqueResult();
+			
+			transaction.commit();
+		} catch(HibernateException he){
+			transaction.rollback();
+		} finally {
+			session.close();
+		}
+		return order;
+	}//getOrderByID
+	
+	public boolean updateOrder(PizzaOrder order){
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+			
+			session.update(order);
+			
+			transaction.commit();
+		} catch(HibernateError he){
+			transaction.rollback();
+			return false;
+		} finally {
+			session.close();
+		}
+		return true;
+	}
+	
+	public boolean updateDiscountedOrder(DiscountedPizzaOrder order){
+		try {
+			session = sessionFactory.openSession();
+			transaction = session.beginTransaction();
+			
+			session.update(order);
+			
+			transaction.commit();
+		} catch(HibernateError he){
+			transaction.rollback();
+			return false;
+		} finally {
+			session.close();
+		}
 		return true;
 	}
 	

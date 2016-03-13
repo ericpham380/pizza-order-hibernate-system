@@ -116,8 +116,38 @@ public class ServiceLayer {
 			if(pizzaShopDAO.createOrder(order)) return true;
 			else return false;
 		}
-		
 	}//finalizePizzaOrder
+	
+	public boolean finalizeUpdateOrder(PizzaOrder order, PizzaSize size, 
+			List<Topping> toppings, PaymentType type){
+		double totalPrice = 0;
+		double totalToppingPrice = 0;
+		
+		for(Topping t : toppings){
+			totalToppingPrice += t.getPrice();
+		}
+		totalPrice = size.getPrice() + totalToppingPrice;
+		
+		order.setPaymentType(type);
+		order.setDeliveryDate(new GregorianCalendar());
+		
+		if(order.getClass() == DiscountedPizzaOrder.class){
+			discountedPizzaOrder = (DiscountedPizzaOrder) order;
+			discountedPizzaOrder.setSize(size);
+			discountedPizzaOrder.setToppingList(toppings);
+			discountedPizzaOrder.setTotalPrice(totalPrice);
+			discountedPizzaOrder.setDiscountPrice(totalPrice);
+			if(pizzaShopDAO.updateDiscountedOrder(discountedPizzaOrder)) return true;
+			else return false;
+		} else {
+			order.setSize(size);
+			order.setToppingList(toppings);
+			order.setTotalPrice(totalPrice);
+			order.setUser(user);
+			if(pizzaShopDAO.updateOrder(order)) return true;
+			else return false;
+		}
+	}//finalizeUpdateOrder
 
 	/**============================ findOrdersByUser ==============================
 	 * Given the user object, call DAO to retrieve all pizza orders made by this user
@@ -148,7 +178,10 @@ public class ServiceLayer {
 			return false;
 	}//cancelOrder
 	
-	
+	public PizzaOrder findOrderByID(int orderID){
+		PizzaOrder order = pizzaShopDAO.getOrderByID(orderID);
+		return order;
+	}//findOrderByID
 	
 	public void quit(){
 		pizzaShopDAO.closeSessionFactory();

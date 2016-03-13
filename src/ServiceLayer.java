@@ -16,7 +16,7 @@ public class ServiceLayer {
 	private static String[] toppingList = {"Pepperoni", "Mushrooms", "Onions", "Sausage", "Bacon",
 			"Extra cheese", "Black olives", "Green peppers", "Pineapple", "Spinach"};
 	
-	private static boolean discountApplied = true;
+	private static boolean discountApplied = false;
 	
 	/**================================ signupUser ================================
 	 * Setup user object and pass it to DAO

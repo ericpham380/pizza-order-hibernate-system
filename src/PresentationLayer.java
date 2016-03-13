@@ -117,20 +117,12 @@ public class PresentationLayer {
 			loggedin = false;
 		}	
 	}//loginView
-
-	/**============================== pizzaOrderView ===============================
-	 * Prompt the user to get information to create a pizza order
-	 */		
-	public static void pizzaOrderView(){
+	
+	public static PizzaSize getPizzaSizeView(){
 		PizzaSize size = null;
-		PaymentType type = null;
-		int numToppings = 0;
-		int toppingNum;
-		double totalPrice = 0;
-		double discountedPrice = 0;
-		List<Topping> toppings = new ArrayList<Topping>();
-		String input;
 		boolean validChoice = true;
+		String input;
+		
 		do {
 			validChoice = true;
 			System.out.println("================================");
@@ -150,6 +142,15 @@ public class PresentationLayer {
 			}
 		} while(validChoice == false);
 
+		return size;
+	}//getPizzaSizeView
+	
+	public static List<Topping> getToppingsView(){
+		List<Topping> toppings = new ArrayList<Topping>();
+		boolean validChoice = true;
+		int numToppings = 0;
+		int toppingNum;
+		
 		System.out.println("================================");
 		System.out.println("Available Toppings");
 		System.out.println("================================");
@@ -185,7 +186,13 @@ public class PresentationLayer {
 			} while(validChoice == false);
 		}
 		reader.nextLine();
-		PizzaOrder order = service.setupPizzaOrder(size, toppings);
+		return toppings;
+	}//getToppingsView
+	
+	public static void printOrderSummary(PizzaOrder order){
+		double totalPrice = 0;
+		double discountedPrice = 0;
+		
 		totalPrice = order.getTotalPrice();
 		System.out.println("================================");
 		if(order.getClass() == DiscountedPizzaOrder.class){
@@ -198,6 +205,13 @@ public class PresentationLayer {
 			System.out.printf("                    Total: $%.2f\n", totalPrice);
 		}
 
+	}//printOrderSummary
+	
+	public static PaymentType getPaymentView(){
+		PaymentType type = null;
+		String input;
+		boolean validChoice = true;
+		
 		do {
 			validChoice = true;
 			System.out.println("================================");
@@ -217,6 +231,24 @@ public class PresentationLayer {
 			}
 		} while(validChoice == false);
 		System.out.println("================================");
+		return type;
+	}
+
+	/**============================== pizzaOrderView ===============================
+	 * Prompt the user to get information to create a pizza order
+	 */		
+	public static void pizzaOrderView(){
+		PizzaSize size = null;
+		PaymentType type = null;
+		List<Topping> toppings = null;
+		
+		size = getPizzaSizeView();
+		toppings = getToppingsView();
+
+		PizzaOrder order = service.setupPizzaOrder(size, toppings);
+		
+		type = getPaymentView();
+
 		if(service.finalizePizzaOrder(order, type)) {
 			System.out.println("Your order is completed.\n");
 		} else {

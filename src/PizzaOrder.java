@@ -9,7 +9,7 @@ import javax.persistence.*;
  * A customer can add upto 3 different or same toppings to the order.
  */
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.JOINED)
 public class PizzaOrder {
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -18,10 +18,10 @@ public class PizzaOrder {
 	@Enumerated(EnumType.STRING)
 	private PizzaSize size;
 	
-	@ManyToMany(cascade=CascadeType.ALL)
-	@JoinTable(name = "Order_Topping", 
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "Order_Topping",
 	joinColumns 		= {@JoinColumn(name = "orderID")}, 
-	inverseJoinColumns 	= {@JoinColumn(name = "toppingID")} )
+	inverseJoinColumns 	= {@JoinColumn(name = "toppingID")})
 	private List<Topping> toppingList;
 	
 	private double totalPrice;

@@ -2,6 +2,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.persistence.criteria.Order;
+
+import antlr.build.Tool;
+
 /**
  * main() using console interface
  * @author ericpham
@@ -14,13 +18,13 @@ public class PresentationLayer {
 	private static String[] toppingList = {"Pepperoni", "Mushrooms", "Onions", "Sausage", "Bacon",
 			"Extra cheese", "Black olives", "Green peppers", "Pineapple", "Spinach"};
 
-	
+
 	public static void main(String[] args) {
-		
+
 		//service.setupTopping();
 
 		int validChoice = 1;
-		
+
 		String choice;
 		System.out.println("================================");
 		System.out.println("==== Welcome to 157B Pizza  ====");
@@ -41,23 +45,29 @@ public class PresentationLayer {
 				System.out.println("====  [Q] Quit              ====");
 			}
 			System.out.println("================================");
-			
+
 			System.out.print("Choose an option: ");
 			choice = reader.nextLine();
 			choice = choice.toUpperCase();
 
 			switch (choice) {
-				case "1": 	loginView();
-					break;
-				case "2": 	signupView();
-					break;
-				case "3":	pizzaOrderView();
-					break;		
-				case "Q": 
-					break;			
-							
-				default : 	System.out.println("Invalid Choice");
-							validChoice = 0;
+			case "1": 	loginView();
+			break;
+			case "2": 	signupView();
+			break;
+			case "3":	pizzaOrderView();
+			break;		
+			case "4":	allOrdersView();
+			break;
+			case "5":	
+				break;
+			case "6":	cancelOrderView();
+			break;
+			case "Q": 
+				break;			
+
+			default : 	System.out.println("Invalid Choice");
+			validChoice = 0;
 			}//switch
 
 
@@ -70,7 +80,7 @@ public class PresentationLayer {
 		service.quit();
 
 	}//main
-	
+
 	/**================================ signupView ================================
 	 * Prompt the user to get information to sign up/create an account
 	 */	
@@ -84,7 +94,7 @@ public class PresentationLayer {
 		else
 			System.out.println("ERROR: cannot create new user.");
 	}//signupView
-	
+
 	/**================================== login ===================================
 	 * Prompt the user to get information to login. If login is successful, print
 	 * success message, else error message
@@ -94,7 +104,7 @@ public class PresentationLayer {
 		String username = reader.nextLine();
 		System.out.print("Password: ");
 		String password = reader.nextLine();
-		
+
 		user = service.login(username, password);
 		if(user != null){
 			System.out.println("================================");
@@ -139,7 +149,7 @@ public class PresentationLayer {
 				System.out.println("ERROR: Invalid choice");
 			}
 		} while(validChoice == false);
-		
+
 		System.out.println("================================");
 		System.out.println("Available Toppings");
 		System.out.println("================================");
@@ -158,7 +168,7 @@ public class PresentationLayer {
 				validChoice = false;
 			}
 		} while(validChoice == false);
-		
+
 		for(i = 1; i <= numToppings; i++){
 			do {
 				validChoice = true;
@@ -187,7 +197,7 @@ public class PresentationLayer {
 		} else{
 			System.out.printf("                    Total: $%.2f\n", totalPrice);
 		}
-		
+
 		do {
 			validChoice = true;
 			System.out.println("================================");
@@ -214,7 +224,77 @@ public class PresentationLayer {
 			System.out.println("Please try again.\n");
 		}
 		System.out.println("********************************");
-
 	}//pizzaOrderView
+
+	/**============================== allOrdersView ================================
+	 * Show all the orders of a user.
+	 */	
+	public static void allOrdersView(){
+		System.out.println("================================");
+		System.out.println("Your Orders");
+		System.out.println("============================================"
+				+ "=====================================");
+		List<PizzaOrder> orders = service.findOrdersByUser();
+		List<Topping> toppings = null;
+		if(orders == null || orders.isEmpty()){
+			System.out.println("You dont have any orders");
+		}else if(orders != null){
+			System.out.printf("%-7s", "ORDER");
+			System.out.printf("%-7s", "SIZE");
+			System.out.printf("%-14s", "TOPPING 1");
+			System.out.printf("%-14s", "TOPPING 2");
+			System.out.printf("%-14s", "TOPPING 3");
+			System.out.printf("%-10s", "DISCOUNT");
+			System.out.printf("%-8s", "TOTAL");
+
+			System.out.printf("%-7s", "PAYMENT");
+			System.out.println();
+			for(PizzaOrder order : orders){
+				if(order != null){
+					System.out.printf("%-7d", order.getOrderID());
+					System.out.printf("%-7s", order.getSize());
+					toppings = order.getToppingList();
+					if(toppings != null){
+						for(Topping topping : toppings){
+							if(topping != null)
+								System.out.printf("%-14s", topping.getName());
+						}
+						for(int i = toppings.size(); i < 3; i++){
+							System.out.printf("%-14s", "null");
+						}
+					}
+					if(order.getClass() == DiscountedPizzaOrder.class){
+						DiscountedPizzaOrder temp = (DiscountedPizzaOrder)order;
+						System.out.printf("%-2.0f", temp.getDiscountedrate() * 100);
+						System.out.printf("%-8s", "% OFF");
+						System.out.printf("$%-7.2f", temp.getDiscountPrice());
+
+					} else{
+						System.out.printf("%-10s", "  NO");
+						System.out.printf("$%-7.2f", order.getTotalPrice());
+					}
+
+					System.out.printf("%-7s", order.getPaymentType());
+					System.out.println();
+				}
+			}//for-loop
+		}//else-statement
+		System.out.println("============================================"
+				+ "=====================================");
+	}//allOrdersView
+
 	
+	/**============================= cancelOrderView ===============================
+	 * Prompt user for orderID and cancel that order
+	 */	
+	public static void cancelOrderView(){
+		System.out.println("================================");
+		System.out.print("Choose an orderID to cancel: ");
+		int orderNum = reader.nextInt();
+		reader.nextLine();
+		if(service.cancelOrder(orderNum))
+			System.out.println("Order is sucessfully cancelled");
+		else
+			System.out.println("Invalid selected order number");
+	}
 }//PresentationLayer

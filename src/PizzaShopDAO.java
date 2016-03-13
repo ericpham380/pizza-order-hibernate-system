@@ -1,3 +1,4 @@
+import java.util.List;
 
 /**
  *Interface that defines methods of DAO
@@ -8,9 +9,13 @@ public interface PizzaShopDAO {
 	
 	Topping createTopping(Topping topping);
 	Topping getToppingByName(String name);
+	List<Topping> getToppingsByOrder(int orderID);
 	
-	Boolean createOrder(PizzaOrder order);
-	Boolean createDiscountedOrder(DiscountedPizzaOrder discountedOrder);
+	boolean createOrder(PizzaOrder order);
+	boolean createDiscountedOrder(DiscountedPizzaOrder discountedOrder);
+	boolean deleteOrder(int orderID);
+	
+	List<PizzaOrder> getOrdersByUser(int userID);
 
 	void closeSessionFactory();
 }

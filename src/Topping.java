@@ -1,3 +1,5 @@
+import java.util.List;
+
 import javax.persistence.*;
 
 /**
@@ -17,6 +19,12 @@ public class Topping {
 	
 	private String name;
 	private double price;
+	
+	@ManyToMany
+	@JoinTable(name = "Order_Topping", 
+	joinColumns 		= {@JoinColumn(name = "toppingID")}, 
+	inverseJoinColumns 	= {@JoinColumn(name = "orderID")})
+	private List<PizzaOrder> orderList;
 	
 	public int getToppingID() {
 		return toppingID;

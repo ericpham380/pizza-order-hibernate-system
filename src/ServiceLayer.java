@@ -1,3 +1,4 @@
+import java.util.GregorianCalendar;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ public class ServiceLayer {
 	private static String[] toppingList = {"Pepperoni", "Mushrooms", "Onions", "Sausage", "Bacon",
 			"Extra cheese", "Black olives", "Green peppers", "Pineapple", "Spinach"};
 	
-	private static boolean discountApplied = false;
+	private static boolean discountApplied = true;
 	
 	/**================================ signupUser ================================
 	 * Setup user object and pass it to DAO
@@ -57,7 +58,10 @@ public class ServiceLayer {
 			pizzaShopDAO.createTopping(topping);
 		}
 	}//setupTopping
-	
+
+	/**============================ findToppingByName =============================
+	 * Given the topping name, return the topping object from database
+	 */	
 	public Topping findToppingByName(String name){
 		topping = pizzaShopDAO.getToppingByName(name);
 		return topping;
@@ -81,6 +85,7 @@ public class ServiceLayer {
 			discountedPizzaOrder.setToppingList(toppingList);
 			discountedPizzaOrder.setTotalPrice(totalPrice);
 			discountedPizzaOrder.setDiscountPrice(totalPrice);
+			
 			discountedPizzaOrder.setUser(user);
 			
 			return discountedPizzaOrder;
@@ -95,12 +100,13 @@ public class ServiceLayer {
 		}
 	}
 
-	/**============================= finalizePizzaOrder ==============================
+	/**=========================== finalizePizzaOrder =============================
 	 * Complete the PizzaOrder object with payment type and pass them to DAO
 	 */	
 	public boolean finalizePizzaOrder (PizzaOrder order, PaymentType type){
 		
 		order.setPaymentType(type);
+		order.setDeliveryDate(new GregorianCalendar());
 		
 		if(order.getClass() == DiscountedPizzaOrder.class){
 			discountedPizzaOrder = (DiscountedPizzaOrder) order;
@@ -113,13 +119,40 @@ public class ServiceLayer {
 		
 	}//finalizePizzaOrder
 
+	/**============================ findOrdersByUser ==============================
+	 * Given the user object, call DAO to retrieve all pizza orders made by this user
+	 */	
+	public List<PizzaOrder> findOrdersByUser(){
+		List<PizzaOrder> orders = null;
+		orders = pizzaShopDAO.getOrdersByUser(user.getUserID());
+		return orders;
+		
+	}//findOrdersByUser
+	
+	/**========================== findToppingsByOrder =============================
+	 * Given an orderID, find the toppings associated with it.
+	 */	
+	public List<Topping> findToppingsByOrder(int orderID){
+		List<Topping> toppings = null;
+		toppings = pizzaShopDAO.getToppingsByOrder(orderID);
+		return toppings;
+	}//findToppingsByOrder
+
+	/**========================== cancelOrder =============================
+	 * Given an orderID, find the pizzaorder object and delete it
+	 */	
+	public boolean cancelOrder(int orderID){
+		if(pizzaShopDAO.deleteOrder(orderID))
+			return true;
+		else
+			return false;
+	}//cancelOrder
+	
+	
 	
 	public void quit(){
 		pizzaShopDAO.closeSessionFactory();
 	}
 
-	public boolean isDiscountApplied() {
-		return discountApplied;
-	}
 
 }//ServiceLayer
